@@ -123,8 +123,11 @@ class HBNBCommand(cmd.Cmd):
             print("** class doesn't exist **")
             return
 
-        class_name = (args.split())[0]
-        parameters = " ".join((args.split())[1:])
+        try:
+            class_name = (args.split())[0]
+            parameters = " ".join((args.split())[1:])
+        except IndexError:
+            pass
 
         temp_dict = {}
         if parameters:
