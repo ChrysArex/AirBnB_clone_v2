@@ -2,7 +2,6 @@
 """ Console Module """
 import cmd
 import sys
-from re import findall
 from models.base_model import BaseModel
 from models.__init__ import storage
 from models.user import User
@@ -74,7 +73,7 @@ class HBNBCommand(cmd.Cmd):
                 pline = pline[2].strip()  # pline is now str
                 if pline:
                     # check for *args or **kwargs
-                    if pline[0] is '{' and pline[-1] is'}'\
+                    if pline[0] == '{' and pline[-1] =='}'\
                             and type(evalue(pline)) is dict:
                         _args = pline
                     else:
@@ -116,37 +115,38 @@ class HBNBCommand(cmd.Cmd):
 
     def do_create(self, args):
         """ Create an object of any class"""
-        if not args:
-            print("** class name missing **")
-            return
-        elif args not in HBNBCommand.classes:
-            print("** class doesn't exist **")
-            return
-
         try:
             class_name = (args.split())[0]
-            parameters = " ".join((args.split())[1:])
+            if not class_name:
+                print("** class name missing **")
+                return
+            elif class_name not in HBNBCommand.classes:
+                print("** class doesn't exist **")
+                return
         except IndexError:
             pass
 
-        temp_dict = {}
-        if parameters:
-            parameters_list = findall(r'(\S+?)=("([^\\"]*(?:\\.[^\\"]*)*)"|(\d+\.\d+)|(\d+))',
-                                  parameters)
-            for parameter in parameters_list:
-                key = parameter[0]
-                if parameter[1]:
-                    value = parameter[1].replace('-', ' ').replace('\\"', '"')
-                elif parameter[2]:
-                    value = float(parameter[2])
-                elif parameter[3]:
-                    value = float(parameter[3])
-                else:
-                    value = int(parameter[4])
-                temp_dict[key] = value
+        arg_list = args.split(" ")
+        new_instance = eval(class_name)()
 
-        new_instance = HBNBCommand.classes[class_name](**temp_dict)
-        storage.save()
+        for item in range(1, len(arg_list)):
+            key, value = tuple(arg_list[item].split("="))
+            if value.startswith('"') and value.endswith('"'):
+                value.strip('"').replace('_', ' ').replace('\\"', '"')
+            elif '.' in value:
+                try:
+                    value = float(value)
+                except ValueError:
+                    pass
+            else:
+                try:
+                    value = int(value)
+                except ValueError:
+                    pass
+            if hasattr(new_instance, key):
+                setattr(new_instance, key, value)
+        
+        storage.new(new_instance)
         print(new_instance.id)
         storage.save()
 
@@ -296,7 +296,7 @@ class HBNBCommand(cmd.Cmd):
                 args.append(v)
         else:  # isolate args
             args = args[2]
-            if args and args[0] is '\"':  # check for quoted arg
+            if args and args[0] == '\"':  # check for quoted arg
                 second_quote = args.find('\"', 1)
                 att_name = args[1:second_quote]
                 args = args[second_quote + 1:]
@@ -304,10 +304,10 @@ class HBNBCommand(cmd.Cmd):
             args = args.partition(' ')
 
             # if att_name was not quoted arg
-            if not att_name and args[0] is not ' ':
+            if not att_name and args[0] != ' ':
                 att_name = args[0]
             # check for quoted value arg
-            if args[2] and args[2][0] is '\"':
+            if args[2] and args[2][0] == '\"':
                 att_value = args[2][1:args[2].find('\"', 1)]
 
             # if att_value was not quoted arg
