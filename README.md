@@ -71,9 +71,19 @@ Advanced syntax is implemented for the following commands:
 <h3>Primary Command Syntax</h3>
 
 ###### Example 0: Create an object
-Usage: create <class_name>
+Usage: create <class_name> <param 1> <param 2> <param 3>...
 ```
 (hbnb) create BaseModel
+```
+```
+(hbnb) create State name="California"
+(hbnb) d80e0344-63eb-434a-b1e0-07783522124e
+(hbnb)
+```
+```
+(hbnb) create Place city_id="0001" user_id="0001" name="My_little_house" number_rooms=4 number_bathrooms=2 max_guest=10 price_by_night=300 latitude=37.773972 longitude=-122.431297
+(hbnb) 76b65327-9e94-4632-b688-aaa22ab8a124
+(hbnb)
 ```
 ```
 (hbnb) create BaseModel
