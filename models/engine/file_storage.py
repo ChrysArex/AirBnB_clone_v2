@@ -23,7 +23,8 @@ class FileStorage:
         try:
             target_class = globals().get(cls)
             if issubclass(target_class, BaseModel):
-                class_dict = {k: v for k, v in self.__objects.items() if isinstance(v, target_class)}
+                class_dict = {k: v for k, v in self.__objects.items()
+                              if isinstance(v, target_class)}
                 return class_dict
         except (TypeError, AttributeError):
             pass
@@ -63,7 +64,7 @@ class FileStorage:
             with open(FileStorage.__file_path, 'r') as f:
                 temp = json.load(f)
                 for key, val in temp.items():
-                        self.all()[key] = classes[val['__class__']](**val)
+                    self.all()[key] = classes[val['__class__']](**val)
         except FileNotFoundError:
             pass
 
