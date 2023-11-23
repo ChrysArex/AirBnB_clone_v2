@@ -9,9 +9,9 @@ class State(BaseModel, Base):
     """ State class """
     __tablename__ = "states"
     name = Column(String(128), nullable=False)
-    cities = relationship("City", cascade="all, delete", backref="state")
+    cities_relationship = relationship("City", cascade="all, delete", backref="state")
 
     @property
     def cities(self):
         """Getter for the cities attribute."""
-        return cities
+        return self.cities_relationship

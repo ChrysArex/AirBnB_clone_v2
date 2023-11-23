@@ -11,7 +11,6 @@ from models.state import State
 from models.user import User
 import os
 
-
 class DBStorage():
     """Manage the database for the HBNB project"""
     __engine = None
@@ -20,36 +19,32 @@ class DBStorage():
     def __init__(self):
         """create the engine"""
         self.__engine = create_engine(
-                "mysql+mysqldb://{}:{}@{}/{}".
-                format(
-                    os.getenv("HBNB_MYSQL_USER"),
-                    os.getenv("HBNB_MYSQL_PWD"),
-                    os.getenv("HBNB_MYSQL_HOST"),
-                    os.getenv("HBNB_MYSQL_DB")
-                    ),
-                pool_pre_ping=True
-                )
+            f"mysql+mysqldb://{os.getenv('HBNB_MYSQL_USER')}:{os.getenv('HBNB_MYSQL_PWD')}@{os.getenv('HBNB_MYSQL_HOST')}/{os.getenv('HBNB_MYSQL_DB')}",
+            pool_pre_ping=True
+        )
         self.__session = sessionmaker(bind=self.__engine)()
+
         metadata = MetaData()
         if os.getenv("HBNB_ENV") == "test":
-            metadata.drop_all(self.__engine)
+            metadata.drop_all(bind=self.__engine)
 
     def all(self, cls=None):
-        """query all objects depending of the class name"""
+        """query all objects depending on the class name"""
         data = {}
         if cls:
-            for element in self.__session.query(text(cls)).all():
-                data[str(cls).split('.')[-1].split('\'')[0] +
-                         '.' + str(element.id)] = element
+            query_class = globals().get(cls)
+            if query_class:
+                for element in self.__session.query(query_class).all():
+                    data[f"{cls}.{element.id}"] = element
         else:
-            for i in [User, State, City, Amenity, Place, Review]:
-                for element in self.__session.query(i).all():
-                    data[str(a).split('.')[-1].split('\'')[0] +
-                         '.' + str(element.id)] = element
+            model_classes = [User, State, City, Amenity, Place, Review]
+            for model_class in model_classes:
+                for element in self.__session.query(model_class).all():
+                    data[f"{model_class.__name__}.{element.id}"] = element
         return data
 
     def new(self, obj):
-        """add the object to the current database session """
+        """add the object to the current database session"""
         self.__session.add(obj)
 
     def save(self):
@@ -57,13 +52,13 @@ class DBStorage():
         self.__session.commit()
 
     def delete(self, obj=None):
-        """delete from the current database session obj if not None"""
+        """delete obj from the current database session"""
         if obj:
             self.__session.delete(obj)
 
     def reload(self):
         """create all tables in the database and the current session"""
         Base.metadata.create_all(self.__engine)
-        Session_f = sessionmaker(bind=self.__engine, expire_on_commit=False)
-        Session = scoped_session(Session_f)
+        Session = scoped_session(sessionmaker(bind=self.__engine, expire_on_commit=False))
         self.__session = Session()
+ 
