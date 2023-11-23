@@ -49,7 +49,11 @@ class DBStorage():
 
     def save(self):
         """commit all changes of the current database session"""
-        self.__session.commit()
+        try:
+            self.__session.commit()
+        except Exception:
+            self.__session.rollback()
+            raise
 
     def delete(self, obj=None):
         """delete obj from the current database session"""
@@ -62,3 +66,6 @@ class DBStorage():
         Session = scoped_session(sessionmaker(bind=self.__engine, expire_on_commit=False))
         self.__session = Session()
  
+    def close(self):
+        """Close the session"""
+        self.__session.remove()

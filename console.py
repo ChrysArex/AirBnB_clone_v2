@@ -114,9 +114,10 @@ class HBNBCommand(cmd.Cmd):
         pass
 
     def do_create(self, args):
-        """ Create an object of any class"""
+        """Create an object of any class"""
         try:
-            class_name = (args.split())[0]
+            arg_list = args.split()
+            class_name = arg_list[0]
             if not class_name:
                 print("** class name missing **")
                 return
@@ -126,13 +127,12 @@ class HBNBCommand(cmd.Cmd):
         except IndexError:
             pass
 
-        arg_list = args.split(" ")
         new_instance = eval(class_name)()
 
-        for item in range(1, len(arg_list)):
-            key, value = tuple(arg_list[item].split("="))
+        for item in arg_list[1:]:
+            key, value = item.split("=")
             if value.startswith('"') and value.endswith('"'):
-                value.strip('"').replace('_', ' ').replace('\\"', '"')
+                value = value.strip('"').replace('_', ' ').replace(r'\"', '"')
             elif '.' in value:
                 try:
                     value = float(value)

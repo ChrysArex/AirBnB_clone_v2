@@ -60,3 +60,4 @@ class BaseModel():
         """delete the current instance from the storage"""
         from models import storage
         del storage.all()[self.to_dict()['__class__'] + '.' + self.id]
+
