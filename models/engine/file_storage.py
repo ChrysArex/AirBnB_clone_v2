@@ -21,8 +21,7 @@ class FileStorage:
             return FileStorage.__objects
 
         try:
-            if isinstance(cls, str):
-                target_class = globals().get(cls)
+            target_class = globals().get(cls)
             if issubclass(target_class, BaseModel):
                 class_dict = {k: v for k, v in self.__objects.items()
                               if isinstance(v, target_class)}
