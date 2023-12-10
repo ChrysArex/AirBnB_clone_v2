@@ -1,47 +1,36 @@
 #!/usr/bin/env bash
+#sets up your web servers for the deployment of web_static
 
-# Install Nginx if not already installed
-if ! command -v nginx &> /dev/null; then
-    sudo apt-get update
-    sudo apt-get install -y nginx
+apt install nginx
+if [ -d "/data/" ]; then
+  mkdir -p "/data/";
+fi
+if [ -d "/data/web_static/" ]; then
+  mkdir -p "/data/web_static/";
+fi
+if [ -d "/data/web_static/releases/" ]; then
+  mkdir -p "/data/web_static/releases/";
+fi
+if [ -d "/data/web_static/shared/" ]; then
+  mkdir -p "/data/web_static/shared/";
+fi
+if [ -d "/data/web_static/releases/test/" ]; then
+  mkdir -p "/data/web_static/releases/test/";
 fi
 
-# Create necessary folders if they don't exist
-sudo mkdir -p /data/
-sudo mkdir -p /data/web_static/
-sudo mkdir -p /data/web_static/releases/
-sudo mkdir -p /data/web_static/shared/
-sudo mkdir -p /data/web_static/releases/test/
-sudo chown -R ubuntu:ubuntu /data
+echo "hello test" > "/data/web_static/releases/test/index.html"
 
-# Create a fake HTML file for testing
-sudo touch /data/web_static/releases/test/index.html
-sudo echo "<html>
-  <head>
-  </head>
-    <body>
-        Holberton School
-    </body>
-</html>" | sudo tee /data/web_static/releases/test/index.html > /dev/null
+if [ -f "/data/web_static/current" ]; then
+  rm /data/web_static/current;
+fi
 
-# Create or recreate symbolic link
-sudo ln -sf /data/web_static/releases/test/ /data/web_static/current
+ln -s "/data/web_static/current" "/data/web_static/releases/test/";
 
-# Update Nginx configuration
-sudo bash -c 'cat > /etc/nginx/sites-available/default' << EOF
-server {
-    listen 80 default_server;
-    listen [::]:80 default_server;
+chown ubuntu:ubuntu -R /data/
 
-    server_name _;
-
-    location /hbnb_static {
-        alias /data/web_static/current/;
-    }
-}
-EOF
-
-# Restart Nginx
-sudo systemctl restart nginx
-
-exit 0
+sudo sed -i "http {/a\
+	server {\
+		location /hbnb_static/ {\
+			alias /data/web_static/current/\
+		}\
+	}" /etc/nginx/nginx.conf
