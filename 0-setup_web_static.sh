@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 #sets up your web servers for the deployment of web_static
 
+{
 sudo apt install nginx
 if [ ! -d "/data/" ]; then
   sudo mkdir -p "/data/";
@@ -38,3 +39,4 @@ sudo sed -i "/http {/a\
 sudo sed -i "s/n      server {/      server {/g" /etc/nginx/nginx.conf
 
 sudo nginx -s reload
+} &>/dev/null
